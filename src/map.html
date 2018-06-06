@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GPX Data</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <link rel="stylesheet" href="map.css">
+
+</head>
+<body>
+
+<h1>Wernersberger Laufstrecken</h1>
+
+<div class="grid-container">
+    <div class="grid-item">
+        <div id="map1" class="map"></div>
+    </div>
+
+    <div class="grid-item">
+        <div id="map2" class="map"></div>
+    </div>
+    <div class="grid-item">
+        <div id="map3" class="map"></div>
+    </div>
+    <div class="grid-item">
+        <div id="map4" class="map"></div>
+    </div>
+    <div class="grid-item">
+        <div id="map5" class="map"></div>
+    </div>
+    <div class="grid-item">
+        <div id="map6" class="map"></div>
+    </div>
+    <div class="grid-item">
+        <div id="map7" class="map"></div>
+    </div>
+
+
+</div>
+<div id="info">&nbsp;</div>
+<script>
+
+    var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+    })
+
+    var style = {
+        'Point': new ol.style.Style({
+            image: new ol.style.Circle({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255,255,0,0.4)'
+                }),
+                radius: 5,
+                stroke: new ol.style.Stroke({
+                    color: '#ff0',
+                    width: 1
+                })
+            })
+        }),
+        'LineString': new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 3
+            })
+        }),
+        'MultiLineString': new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'red',
+                width: 3
+            })
+        })
+    };
+
+    createMap('map1', 'route1.gpx');
+    createMap('map2', 'route2.gpx');
+    createMap('map3', 'route3.gpx');
+    createMap('map4', 'route4.gpx');
+    createMap('map5', 'route5.gpx');
+    createMap('map6', 'route6.gpx');
+    createMap('map7', 'route7.gpx');
+
+    function createMap(name, file) {
+
+        var source = new ol.source.Vector({
+            url: file,
+            format: new ol.format.GPX()
+        });
+
+        var vector = new ol.layer.Vector({
+            source: source,
+            style: function (feature) {
+                return style[feature.getGeometry().getType()];
+            }
+
+        });
+
+        var map = new ol.Map({
+            layers: [raster, vector],
+            target: document.getElementById(name),
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 12
+            })
+        });
+
+        source.on('change', function () {
+            var coordinates = source.getFeatures()[0].getGeometry().getCoordinates();
+            console.log(coordinates[0][0])
+            map.getView().setCenter([coordinates[0][0][0], coordinates[0][0][1]]);
+        });
+
+    }
+</script>
+</body>
+</html>
