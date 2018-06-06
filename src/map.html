@@ -8,6 +8,11 @@
     <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
     <link rel="stylesheet" href="map.css">
 
+    <!-- OL-ext -->
+    <link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css"/>
+    <script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script>
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
 <body>
 
@@ -105,11 +110,42 @@
             })
         });
 
+        // New profil in the map
+        var profil = new ol.control.Profil();
+        map.addControl(profil);
+
+
         source.on('change', function () {
             var coordinates = source.getFeatures()[0].getGeometry().getCoordinates();
             console.log(coordinates[0][0])
             map.getView().setCenter([coordinates[0][0][0], coordinates[0][0][1]]);
+
+            if (source.getState() === 'ready') {
+                profil.setGeometry(source.getFeatures()[0]);
+
+                pt = new ol.Feature(new ol.geom.Point([0, 0]));
+                pt.setStyle([]);
+                source.addFeature(pt);
+            }
         });
+
+        // Draw a point on the map when mouse fly over profil
+        function drawPoint(e) {
+            if (!pt) return;
+            if (e.type == "over") {	// Show point at coord
+                pt.setGeometry(new ol.geom.Point(e.coord));
+                pt.setStyle(null);
+            }
+            else {	// hide point
+                pt.setStyle([]);
+            }
+        };
+        // Show a popup on over
+        profil.on(["over", "out"], function (e) {
+            if (e.type == "over") profil.popup(e.coord[2] + " m");
+            drawPoint(e);
+        });
+
 
     }
 </script>
